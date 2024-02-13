@@ -15,9 +15,9 @@ import java.io.File
     name = "Change header",
     description = "Applies a custom header in the top left corner within the app. Defaults to the ReVanced header.",
     compatiblePackages = [
-        CompatiblePackage("com.google.android.youtube")
+        CompatiblePackage("com.google.android.youtube"),
     ],
-    use = false
+    use = false,
 )
 @Suppress("unused")
 object ChangeHeaderPatch : ResourcePatch() {
@@ -64,13 +64,13 @@ object ChangeHeaderPatch : ResourcePatch() {
     override fun execute(context: ResourceContext) {
         // The directories to copy the header to.
         val targetResourceDirectories = targetResourceDirectoryNames.mapNotNull {
-            context["res"].resolve(it).takeIf(File::exists)
+            context.get("res", false).resolve(it).takeIf(File::exists)
         }
         // The files to replace in the target directories.
         val targetResourceFiles = targetResourceDirectoryNames.map { directoryName ->
             ResourceGroup(
                 directoryName,
-                *variants.map { variant -> "${HEADER_NAME}_$variant.png" }.toTypedArray()
+                *variants.map { variant -> "${HEADER_NAME}_$variant.png" }.toTypedArray(),
             )
         }
 
@@ -109,7 +109,7 @@ object ChangeHeaderPatch : ResourcePatch() {
             var copiedReplacementImages = false
             // For all the resource groups in the custom header folder, copy them to the resource directories.
             File(header!!).listFiles { file -> file.isDirectory }?.forEach { folder ->
-                val targetDirectory = context["res"].resolve(folder.name)
+                val targetDirectory = context.get("res", false).resolve(folder.name)
                 // Skip if the target directory (DPI) doesn't exist.
                 if (!targetDirectory.exists()) return@forEach
 
